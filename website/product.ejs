@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <style>
+        body {
+            background-color: #222;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #444;
+            position: relative;
+        }
+
+        h1, h2 {
+            color: #fff;
+        }
+
+        p {
+            color: #ccc;
+            margin-bottom: 10px;
+        }
+
+        .image-container {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .images {
+            display: flex;
+            overflow-x: hidden;
+            scroll-snap-type: x mandatory;
+            justify-content: flex-start;
+            gap: 20px;
+        }
+
+        .image-wrapper {
+            flex: 0 0 auto;
+            width: 100%;
+            scroll-snap-align: start;
+        }
+
+        .image-wrapper img {
+            width: 100%;
+            max-height: 500px;
+            object-fit: contain;
+            cursor: pointer;
+        }
+
+        .pagination {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            width: calc(100% - 40px);
+            padding: 0 20px;
+        }
+
+        .prev, .next {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            padding: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product Details</h1>
+
+        <div>
+            <h2><%= product.Name %></h2>
+            <p>Description: <%= product.Description %></p>
+            <p>Price: $<%= product.Price %></p>
+            <p>Tags: <%= product.Tags %></p>
+        </div>
+
+        <div class="image-container">
+            <div class="images" id="images">
+                <% images.forEach((image, index) => { %>
+                    <% if (image && image.data) { %>
+                        <div class="image-wrapper" onclick="expandImage(`data:image/png;base64, <%= image.data %>`)">
+                            <img src="data:image/png;base64, <%= image.data %>" alt="Product Image">
+                        </div>
+                    <% } %>
+                <% }) %>
+            </div>
+            <div class="pagination">
+                <button class="prev" onclick="move(-1)">&#10094;</button>
+                <button class="next" onclick="move(1)">&#10095;</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentIndex = 0;
+        const images = document.querySelectorAll('.images img');
+        const totalImages = images.length;
+
+        function move(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) {
+                currentIndex = totalImages - 1;
+            }
+            if (currentIndex >= totalImages) {
+                currentIndex = 0;
+            }
+            images[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+        }
+
+        function expandImage(imageSrc) {
+            var images = document.querySelectorAll('.images img');
+            var currentIndex = Array.from(images).findIndex(img => img.src === imageSrc);
+
+            var modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            modal.style.zIndex = '9999';
+            modal.onclick = function(event) {
+                if (event.target === modal) {
+                    modal.remove();
+                }
+            };
+
+            var img = document.createElement('img');
+            img.src = imageSrc;
+            img.style.position = 'fixed';
+            img.style.top = '50%';
+            img.style.left = '50%';
+            img.style.transform = 'translate(-50%, -50%)';
+            img.style.maxWidth = '90%';
+            img.style.maxHeight = '90%';
+            img.style.cursor = 'pointer';
+
+            var prevArrow = document.createElement('div');
+            prevArrow.textContent = '<';
+            prevArrow.style.position = 'fixed';
+            prevArrow.style.top = '50%';
+            prevArrow.style.left = '20px';
+            prevArrow.style.fontSize = '30px';
+            prevArrow.style.cursor = 'pointer';
+            prevArrow.style.color = '#fff';
+            prevArrow.style.zIndex = '10000';
+            prevArrow.onclick = function() {
+                currentIndex = (currentIndex - 1 + images.length) % images.length;
+                img.src = images[currentIndex].src;
+            };
+
+            var nextArrow = document.createElement('div');
+            nextArrow.textContent = '>';
+            nextArrow.style.position = 'fixed';
+            nextArrow.style.top = '50%';
+            nextArrow.style.right = '20px';
+            nextArrow.style.fontSize = '30px';
+            nextArrow.style.cursor = 'pointer';
+            nextArrow.style.color = '#fff';
+            nextArrow.style.zIndex = '10000';
+            nextArrow.onclick = function() {
+                currentIndex = (currentIndex + 1) % images.length;
+                img.src = images[currentIndex].src;
+            };
+
+            modal.appendChild(img);
+            modal.appendChild(prevArrow);
+            modal.appendChild(nextArrow);
+            document.body.appendChild(modal);
+        }
+    </script>
+</body>
+</html>

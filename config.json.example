@@ -1,0 +1,12 @@
+{
+    "MONGO_URL": "",
+    "APP_ID": "",
+    "Client_Secret": "",
+    "Callback_Url": "http://86.11.157.42:3000/api/v1/auth/discord/callback",
+    "BASE_URL": "http://86.11.157.42:3000",
+    "PORT": 3000,
+    "ADMINS": [
+        "881277706862481479"
+    ],
+    "STRIPE_SECRET_KEY": ""
+}
