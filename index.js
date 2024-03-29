@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const config = require('./config.json');
 const session = require('express-session');
+const fetch = require('node-fetch');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const mongoose = require('mongoose');
@@ -13,6 +14,8 @@ const Product = require('./Database/Product');
 const stripe = require('stripe')(config.STRIPE_SECRET_KEY);
 const fs = require('fs');
 const generateID = require('./generate-id');
+const Cart = require('./Database/Cart.js');
+const User = require('./Database/User.js');
 
 const app = express();
 
@@ -44,19 +47,50 @@ app.use(
     })
 );
 
-passport.use(
-    new DiscordStrategy(
-        {
-            clientID: config.APP_ID,
-            clientSecret: config.Client_Secret,
-            callbackURL: config.Callback_Url,
-            scope: ['identify', 'guilds'],
-        },
-        (accessToken, refreshToken, profile, done) => {
-          process.nextTick(() => {
-            return done(null, profile);
+passport.use(new DiscordStrategy({
+    clientID: config.APP_ID,
+    clientSecret: config.Client_Secret,
+    callbackURL: config.Callback_Url,
+    scope: ['identify', 'guilds.join'],
+  },
+  async (accessToken, refreshToken, profile, done) => {
+    const guildId = config.GUILD_ID;
+    const botToken = config.TOKEN;
+
+    try {
+        let user = await User.findOne({ UserId: profile.id });
+
+        if (!user) {
+          user = await User.create({
+            UserId: profile.id,
+            CreatedAt: new Date(),
+            AccountType: "User",
+            Purchases: null
           });
         }
+
+      const url = `https://discord.com/api/guilds/${guildId}/members/${profile.id}`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bot ${botToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          access_token: accessToken,
+        }),
+      });
+      if (response.status === 204 || response.ok) {
+        done(null, profile);
+      } else {
+        console.error(`Failed to add user to guild: ${response.statusText}`);
+        throw new Error(`Failed to add user to guild: ${response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to add user to guild:', error);
+      done(error);
+    }
+  }
 ));
 
 app.use(passport.initialize());
@@ -65,14 +99,52 @@ app.use(passport.session());
 passport.serializeUser((user, done) => done(null, user));
 passport.deserializeUser((obj, done) => done(null, obj));
 
-app.get('/', async (req, res) => {
-    res.render('landing');
+app.get('*', async (req, res, next) => {
+    if (req.user) {
+        req.user.cart = await Cart.findOne({ UserId: req.user.id });
+        let userData = await User.findOne({ UserId: req.user.id });
+        if (!userData) {
+            userData = await User.create({
+                UserId: req.user.id,
+                CreatedAt: new Date(),
+                AccountType: "User"
+              });
+      
+              await user.save();
+        }
+
+        req.userData = userData;
+    }
+    next();
 });
 
-app.get('/products', async (req, res) => {
-    const products = await Product.find();
-    res.render('products', { products });
+app.get('/login', 
+    passport.authenticate('discord')
+)
+
+app.get('/', async (req, res) => {
+    res.render('landing', { user: req.user });
 });
+
+app.get('/store', ensureAuthenticated, async (req, res) => {
+    const products = await Product.find();
+    res.render('products', { products, user: req.user });
+});
+
+app.get('/store/:productId', ensureAuthenticated, async (req, res) => {
+    const { productId } = req.params;
+    const product = await Product.findById(productId);
+    if (!product) return res.render('404');
+    else {
+        res.render('product', { product, user: req.user, images: ["https://plexdevelopment.net/images/user-881277706862481479.png"] });
+    }
+})
+
+app.get('/account', ensureAuthenticated, async (req, res) => {
+    res.render('account', { user: req.user, actualUser: req.userData })
+})
+
+// STUFF TO DO WITH PAYMENTS
 
 app.get('/purchase/success', async (req, res) => {
     const session_id = req.query.session_id;
@@ -88,7 +160,7 @@ app.get('/purchase/success', async (req, res) => {
     }
     try {
         if (session.payment_status === 'paid') {
-            const license = await generateProductId(session_id);
+            const license = await generateProductId(req.user);
             res.render('purchase_success', { session, licenseKey: license });
         } else {
             res.status(403).send('Payment was not successful');
@@ -99,25 +171,9 @@ app.get('/purchase/success', async (req, res) => {
     }
 });
 
-app.get('/purchase/:id', async (req, res) => {
-    try {
-        const productId = req.params.id;
-        const product = await Product.findById(productId);
-
-        if (!product) {
-            return res.status(404).send('Product not found.');
-        }
-
-        res.render('product_purchase', { product });
-    } catch (error) {
-        console.error('Failed to load product page:', error);
-        res.status(500).send('Internal Server Error.');
-    }
-});
-
 app.get('/dashboard', isAuthenticatedAndAdmin, async (req, res) => {
     const products = await Product.find();
-    res.render('admin_dashboard', { products });
+    res.render('admin_dashboard', { products, user: req.user });
 });
 
 app.post('/add-product', isAuthenticatedAndAdmin, async (req, res) => {
@@ -157,16 +213,12 @@ app.post('/create-checkout-session', async (req, res) => {
     res.json({ url: session.url });
 });
 
-function isAuthenticatedAndAdmin(req, res, next) {
-    if (req.isAuthenticated() && config.ADMINS.includes(req.user.id)) {
-        return next();
-    }
-    res.redirect('/');
-}
-
 const apiRouter = require('./routes/api');
-const licences = require('./Database/licences.js');
 app.use('/api/v1', apiRouter);
+
+app.get('*', async (req, res) => {
+    res.render('404', { user: req.user });
+})
 
 app.listen(config.PORT, () => {
     logs.info(`Listening on port ${config.PORT}`)
@@ -176,22 +228,15 @@ function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
-    res.redirect('/api/v1/auth/discord');
+    res.redirect('/login');
 }
 
-function checkAdmin(req, res, next) {
-    const admin = config.ADMINS.includes(req.user.id) ? true : false;
-    if (admin == true) {
-        return next()
-    };
-    res.redirect('/')
-}
-
-async function generateProductId(sessionID) {
+const licences = require('./Database/licences.js');
+async function generateProductId(user) {
          let isUnique = false;
          let productId = null;
 
-         const data = await licenses.findOne({ SessionId: sessionID});
+         const data = await licenses.findOne({ UserId: user.id});
 
          if (data) return data.License;
     
@@ -208,8 +253,15 @@ async function generateProductId(sessionID) {
 
          await licenses.create({
             License: productId,
-            SessionId: sessionID
+            UserId: user.id
          })
     
          return productId;
+}
+
+function isAuthenticatedAndAdmin(req, res, next) {
+    if (req.isAuthenticated() && config.ADMINS.includes(req.user.id)) {
+        return next();
+    }
+    res.render('404', { user: req.user });
 }

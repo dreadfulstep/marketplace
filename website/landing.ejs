@@ -1,40 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Include Bootstrap CSS for styling -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pulsey Development</title>
+    <link href="/styles/main.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.0.9/css/boxicons.min.css" rel="stylesheet">
+    <style>
+        #menu {
+            transition: transform 0.3s ease;
+            will-change: transform;
+        }
+        #menu.hidden {
+            transform: translateX(-100%);
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const menuButton = document.getElementById('menuButton');
+            const menu = document.getElementById('menu');
+
+            menu.classList.add('hidden');
+
+            menuButton.addEventListener('click', () => {
+                if (menu.classList.contains('hidden')) {
+                    menu.classList.remove('hidden');
+                    setTimeout(() => {
+                        menu.classList.remove('-translate-x-full');
+                    }, 10);
+                } else {
+                    menu.classList.add('-translate-x-full');
+                    setTimeout(() => {
+                        menu.classList.add('hidden');
+                    }, 300);
+                }
+            });
+        });
+    </script>
 </head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="/">Pulsey Development</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/products">Products</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/login">Login with Discord</a>
-                </li>
-            </ul>
-        </div>
-    </nav>
+<body class="bg-gray-900 text-white">
 
-    <div class="container mt-5">
-        <div class="jumbotron">
-            <h1 class="display-4">Welcome to Pulsey Development</h1>
-            <p class="lead">Explore our top-notch Discord bots designed to enhance your server's functionality and engagement.</p>
-            <hr class="my-4">
-            <a class="btn btn-primary btn-lg" href="/products" role="button">Browse Products</a>
+    <%- include('partials/navbar.ejs') %>
+
+    <div class="pt-16 md:pt-15">
+    <div class="text-center px-4">
+        <h1 class="text-5xl font-bold mt-10">Welcome to Pulsey.dev!</h1>
+        <p class="mt-4 text-xl font-light">The marketplace for all kinds of digital assets such as Discord bots!</p>
+
+        <div class="mt-8 px-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-gray-800 p-4 rounded shadow flex flex-col items-center justify-center">
+                    <i class='bx bx-user bx-lg text-3xl text-white'></i>
+                    <span class="mt-2 text-xl text-white">999+</span>
+                    <span class="text-sm text-gray-400">Happy Customers</span>
+                </div>
+                <div class="bg-gray-800 p-4 rounded shadow flex flex-col items-center justify-center">
+                    <i class='bx bx-store bx-lg text-3xl text-white'></i>
+                    <span class="mt-2 text-xl text-white">999+</span>
+                    <span class="text-sm text-gray-400">Items</span>
+                </div>
+                <div class="bg-gray-800 p-4 rounded shadow flex flex-col items-center justify-center">
+                    <i class='bx bx-shopping-bag bx-lg text-3xl text-white'></i>
+                    <span class="mt-2 text-xl text-white">999+</span>
+                    <span class="text-sm text-gray-400">Sales</span>
+                </div>
+                <div class="bg-gray-800 p-4 rounded shadow flex flex-col items-center justify-center">
+                    <i class='bx bx-package bx-lg text-3xl text-white'></i>
+                    <span class="mt-2 text-xl text-white">999+</span>
+                    <span class="text-sm text-gray-400">Items</span>
+                </div>
+            </div>
         </div>
+
+        <a href="/store" class="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition duration-300 mt-10">Shop Now</a>
     </div>
-
-    <!-- Include Bootstrap JS and jQuery -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.5/dist/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </div>
+    <%- include('partials/footer.ejs') %>
 </body>
 </html>

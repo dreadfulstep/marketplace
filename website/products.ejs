@@ -1,19 +1,71 @@
-<% include ('partials/header.ejs') %>
-<div class="container mt-5">
-    <h2 class="mb-4">Our Products</h2>
-    <div class="row">
-        <% products.forEach(function(product) { %>
-            <div class="col-md-4 mb-4">
-                <div class="card">
-                    <img src="<%= product.imageUrl %>" class="card-img-top" alt="<%= product.name %>">
-                    <div class="card-body">
-                        <h5 class="card-title"><%= product.name %></h5>
-                        <p class="card-text"><%= product.description %></p>
-                        <a href="/purchase/<%= product._id %>" class="btn btn-primary">Buy Now</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store - Pulsey Development</title>
+    <link href="/styles/main.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.0.9/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+    <%- include('partials/navbar.ejs') %>
+    <div class="pt-20 container mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-4 text-center">Our Products</h2>
+        <div class="grid md:grid-cols-3 gap-4">
+            <% products.forEach(function(product) { %>
+                <div class="rounded overflow-hidden shadow-lg bg-gray-800">
+                    <img src="<%= product.MainImage %>" alt="Image failed to load." class="w-full h-48 object-cover">
+                    <div class="px-6 py-4">
+                        <div class="font-bold text-xl mb-2"><%= product.Name %></div>
+                        <p class="text-gray-300 text-base">
+                            <%= product.Description %>
+                        </p>
+                    </div>
+                    <div class="px-6 pt-4 pb-2">
+                        <button onclick="addToCart('<%= product._id %>')" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <i class='bx bx-cart' ></i>
+                            Add to Cart
+                        </button>
                     </div>
                 </div>
-            </div>
-        <% }); %>
+            <% }); %>
+        </div>
     </div>
-</div>
-<% include ('partials/footer.ejs') %>
+    <%- include('partials/footer.ejs') %>
+    <div id="toaster" class="fixed bottom-0 right-0 mb-4 mr-4 p-4 bg-blue-500 text-white rounded opacity-0 transition-opacity duration-300"></div>
+
+    <script>
+        function addToCart(productId) {
+            fetch('/api/v1/add-cart', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ productId }),
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    const errorResponse = await response.json();
+                    throw new Error(errorResponse.error);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showToast(data.message);
+            })
+            .catch((error) => {
+                showToast(error.message, true);
+            });
+        }
+        
+        function showToast(message, isError = false) {
+            const toaster = document.getElementById('toaster');
+            toaster.textContent = message;
+            toaster.className = `fixed bottom-0 right-0 mb-4 mr-4 p-4 rounded opacity-100 transition-opacity duration-300 ${isError ? 'bg-red-500' : 'bg-blue-500'} text-white`;
+            setTimeout(() => {
+                toaster.style.opacity = '0';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

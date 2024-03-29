@@ -8,5 +8,7 @@
     "ADMINS": [
         "881277706862481479"
     ],
-    "STRIPE_SECRET_KEY": ""
+    "STRIPE_SECRET_KEY": "",
+    "TOKEN": "",
+    "GUILD_ID": "1184968631013081169"
 }

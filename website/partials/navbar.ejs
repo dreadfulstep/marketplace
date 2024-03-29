@@ -1,16 +1,68 @@
-<nav class="navbar">
-    <div class="navbar-brand">
-        <img src="/logo.png" alt="" class="logo">
-        <span class="brand-name">Pulsey</span>
-    </div>
-    <div class="navbar-links">
-        <a href="#" class="navbar-btn">Marketplace</a>
-        <a href="#" class="navbar-btn">Contact</a>
-    </div>
-    <div class="navbar-actions">
-        <a href="/api/v1/auth/discord" class="navbar-btn login-btn">
-            <i class='bx bx-log-in'></i>
+<nav class="bg-gray-800 fixed w-full z-50 top-0 left-0 shadow-md">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+            <div class="flex-shrink-0">
+                <a href="/" class="flex items-center text-white hover:text-gray-200">
+                    <span class="font-bold">Pulsey Development</span>
+                </a>
+            </div>
+            <div class="hidden md:flex flex-grow justify-center items-center">
+                <div class="flex items-baseline space-x-4">
+                    <a href="/" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                    <a href="/store" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Store</a>
+                    <a href="/tos" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">TOS</a>
+                    <a href="/documentation" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Documentation</a>
+                    <a href="/contact" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                    <a href="/tools" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Tools</a>
+                </div>
+            </div>
+            <div class="hidden md:block">
+                <% if (user) { %>
+                    <div class="flex items-center space-x-4">
+                        <div class="relative group">
+                            <button class="flex items-center px-3 py-2 rounded-md text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:border-blue-700 focus:shadow-outline-blue transition duration-150 ease-in-out" onclick="window.location.href = '/account'">
+                                <i class='bx bxl-discord-alt mr-2'></i>
+                                <%= user.username %>
+                            </button>
+                        </div>
+                        <a href="/cart" class="flex items-center text-white hover:text-gray-200">
+                            <i class='bx bx-cart'></i>
+                            <span>Cart (<%= user.cart ? user.cart.Cart.length : 0 %>)</span>
+                        </a>
+                    </div>
+                <% } else { %>
+                    <a href="/login" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:border-blue-700 focus:shadow-outline-blue active:bg-blue-700 transition duration-150 ease-in-out">
+                        <i class='bx bxl-discord-alt mr-2'></i> Login
+                    </a>
+                <% } %>
+            </div>
+            <div class="md:hidden">
+                <button id="menuButton" class="text-white focus:outline-none">
+                    <i class='bx bx-menu bx-md'></i>
+                </button>
+            </div>
+        </div>
+
+    <div id="menu" class="bg-gray-800 fixed w-64 h-full top-0 left-0 transform -translate-x-full transition-transform duration-300 ease-in-out md:hidden">
+        <div class="flex items-center space-x-2 p-5">
+            <span class="font-bold text-xl">Pulsey Development</span>
+        </div>
+        <a href="/" class="block py-2 px-4 text-sm hover:bg-gray-700">Home</a>
+        <a href="/store" class="block py-2 px-4 text-sm hover:bg-gray-700">Store</a>
+        <a href="/tos" class="block py-2 px-4 text-sm hover:bg-gray-700">TOS</a>
+        <a href="#" class="block py-2 px-4 text-sm hover:bg-gray-700">Documentation</a>
+        <a href="/contact" class="block py-2 px-4 text-sm hover:bg-gray-700">Contact</a>
+        <a href="#" class="block py-2 px-4 text-sm hover:bg-gray-700">Tools</a>
+      <% if (user) { %>
+        <span class="block py-2 px-4 text-sm">
+            <i class='bx bxl-discord-alt mr-2 mt-1'></i>
+            <%= user.username %>
+        </span>
+      <% } else { %>
+        <a href="/login" class="block py-2 px-4 text-sm bg-blue-500 hover:bg-blue-600 rounded">
+            <i class='bx bxl-discord-alt mr-2 mt-0.5'></i>
             <span>Login</span>
         </a>
+      <% } %>
     </div>
 </nav>

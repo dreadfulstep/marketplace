@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account - Pulsey Development</title>
+    <link href="/styles/main.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.0.9/css/boxicons.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white">
+    <%- include('partials/navbar.ejs') %>
+
+    <div class="container mx-auto px-4 py-6 pt-32 md:pt-15">
+        <div class="max-w-xl mx-auto">
+            <div class="bg-gray-800 p-5 rounded-lg shadow-lg">
+                <div class="text-center mb-6">
+                    <img src="https://cdn.discordapp.com/avatars/<%= user.id %>/<%= user.avatar %>.png" alt="User Avatar" onerror="this.onerror=null;this.src='/logo.png';" class="w-20 h-20 rounded-full mx-auto">
+                    <h1 class="text-2xl font-bold mt-2">Account Information</h1>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <h2 class="text-lg font-semibold">Username:</h2>
+                        <p><%= user.username %></p>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold">Account Type:</h2>
+                        <p><%= actualUser.AccountType %></p>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold">Account ID:</h2>
+                        <p><%= user.id %></p>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold">Joined Pulsey Development:</h2>
+                        <p><%= actualUser.CreatedAt.toDateString() %></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <%- include('partials/footer.ejs') %>
+</body>
+</html>
